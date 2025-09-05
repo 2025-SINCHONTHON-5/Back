@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import SupplyPostViewSet
 # Comment 뷰가 실제로 있다면 아래 주석 해제:
-# from .views import Comment
+from .views import Comment
 
 supply_list   = SupplyPostViewSet.as_view({"get": "list", "post": "create"})
 supply_detail = SupplyPostViewSet.as_view({
@@ -18,5 +18,5 @@ urlpatterns = [
     path("<int:pk>/join/", supply_join, name="supply-join"),
     path("<int:pk>/quote/", supply_quote, name="supply-quote"),
     path("<int:pk>/applicants/", supply_apps, name="supply-applicants"),
-    path("<int:pk>/comment/", Comment.as_view(), name="supply-comment"),
+    path("comment/", Comment.as_view(), name="supply-comment"),
 ]
