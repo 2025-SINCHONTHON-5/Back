@@ -13,6 +13,19 @@ class Root(APIView):
         else:
             return [IsAuthenticated()]
 
+    def get(self, request:HttpRequest, format=None):
+        user = request.user
+
+        return Response(
+            status=status.HTTP_200_OK,
+            data={
+                "name": user.name,
+                "email": user.email,
+                "receive_request_count": user.supplies.count(),
+                "join_request_count": user.supply_joins.count(),
+            },
+        )
+
     def post(self, request:HttpRequest, format=None):
         user_service = UserService(request)
         user = user_service.post()
