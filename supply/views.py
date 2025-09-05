@@ -29,6 +29,12 @@ class SupplyPostViewSet(viewsets.ModelViewSet):
         if self.action == "list":
             return SupplyPostListSerializer
         return SupplyPostDetailSerializer
+    def perform_create(self, serializer):
+        """
+        새 SupplyPost 작성 시 author는 요청한 유저(request.user)로 자동 세팅
+        → 클라 body에 author 안 보내도 됨
+        """
+        serializer.save(author=self.request.user)
 
     @action(detail=True, methods=["post"], url_path="join")
     def join(self, request, pk=None):
