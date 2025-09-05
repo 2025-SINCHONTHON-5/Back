@@ -30,66 +30,40 @@ class CommentSerializer(serializers.ModelSerializer):
 
 class SupplyPostCreateSerializer(serializers.ModelSerializer):
     """
-    [생성 시리얼라이저]
-    - 입력: apply_input/execute_input(자유문자열), demand_post_id/payout_account_id(정수 PK)
-    - 검증: total_amount >= 0 허용(나눔), max_participants >= 1, execute_time > apply_deadline
-    - 자동참여: auto_include_requester=True면 작성자를 자동 참여(선택)
+    생성용
+    - request: FK 정수 PK 그대로 받음 (원본 글 표시는 FK 따라가서 프론트가 렌더)
+    - apply_input / execute_input: 자유문자열 입력 → DateTime 변환
+    - total_amount: 0원 이상 허용
+    - max_participants: 1 이상
     """
     apply_input = serializers.CharField(write_only=True, required=True)
     execute_input = serializers.CharField(write_only=True, required=True)
-    auto_include_requester = serializers.BooleanField(write_only=True, required=False, default=False)
 
     class Meta:
         model = SupplyPost
         fields = [
             "id", "author",
-            "demand_post_id", "payout_account_id",
+            "request",                # FK: Request.Request
             "title", "content", "image",
             "total_amount", "max_participants",
             "apply_deadline", "execute_time", "apply_input", "execute_input",
-            "auto_include_requester",
-            # 수요 스냅샷은 서버가 필요 시 채울 수 있으므로 입력필드 아님
         ]
         read_only_fields = ["apply_deadline", "execute_time"]
 
     def validate(self, attrs):
-        # 시간 파싱
         attrs["apply_deadline"] = parse_user_datetime(attrs.pop("apply_input"), default="end")
         attrs["execute_time"] = parse_user_datetime(attrs.pop("execute_input"), default="start")
         if attrs["execute_time"] <= attrs["apply_deadline"]:
             raise serializers.ValidationError("시행시간은 마감시간 이후여야 합니다.")
-
-        # 총액/인원 검증 (총액은 0도 허용)
         if attrs["total_amount"] < 0:
             raise serializers.ValidationError("총액은 음수가 될 수 없습니다.")
         if attrs["max_participants"] < 1:
             raise serializers.ValidationError("최대 인원은 1 이상이어야 합니다.")
-
         return attrs
-
-    def create(self, validated_data):
-        auto_include = validated_data.pop("auto_include_requester", False)
-        supply = super().create(validated_data)
-
-        # (옵션) 수요글 스냅샷을 서버에서 채우고 싶다면 여기서 외부 조회 후
-        # supply.demand_snapshot_* 필드를 업데이트하면 된다.
-        # 현재는 프론트가 이미 카드로 보여주고, 서버는 저장만 담당한다고 가정.
-
-        if auto_include and supply.demand_post_id:
-            # 작성자 자동 참여(선택 플래그가 True일 때만)
-            unit = (Decimal(supply.total_amount) / Decimal(supply.max_participants))\
-                    .to_integral_value(rounding=ROUND_UP)
-            SupplyJoin.objects.get_or_create(
-                supply=supply, user=supply.author, defaults={"unit_amount": unit}
-            )
-        return supply
 
 
 class SupplyPostListSerializer(serializers.ModelSerializer):
-    """
-    [목록 시리얼라이저]
-    - 리스트 UI에 필요한 최소 필드만 노출
-    """
+    """목록용: 최소 필드"""
     unit_amount_preview = serializers.ReadOnlyField()
 
     class Meta:
@@ -104,29 +78,42 @@ class SupplyPostListSerializer(serializers.ModelSerializer):
 
 class SupplyPostDetailSerializer(serializers.ModelSerializer):
     """
-    [상세 시리얼라이저]
-    - 본문, 스냅샷, 금액, 시간 등 상세 정보 제공
+    상세용
+    - request_card: 원본 요청글을 카드로 보여주기 위한 최소 정보(제목/내용/이미지 등)를 FK를 통해 읽어서 제공.
+      스냅샷 저장 없이 매 조회 시 FK로 접근해 직렬화.
     """
     unit_amount_preview = serializers.ReadOnlyField()
+    request_card = serializers.SerializerMethodField()
 
     class Meta:
         model = SupplyPost
         fields = [
             "id", "author",
-            "demand_post_id", "payout_account_id",
+            "request",                 # FK id 그대로 표시(필요 시 read_only 처리 가능)
             "title", "content", "image",
             "total_amount", "max_participants",
             "apply_deadline", "execute_time",
             "unit_amount_preview", "status", "created_at",
-            "demand_snapshot_title", "demand_snapshot_content", "demand_snapshot_image_url",
+            "request_card",           # 폼 하단 카드용 데이터
         ]
+
+    def get_request_card(self, obj):
+        r = obj.request
+        if not r:
+            return None
+        # Request 모델의 필드명을 실제 스키마에 맞춰 조정하세요.
+        # 예시: title/content/image(또는 image_url) 이 있다고 가정
+        return {
+            "id": r.id,
+            "title": getattr(r, "title", ""),
+            "content": getattr(r, "content", ""),
+            "photo": getattr(r, "photo", None) if hasattr(r, "image") else getattr(r, "image_url", None),
+            # 필요시 더 노출
+        }
 
 
 class SupplyJoinSerializer(serializers.ModelSerializer):
-    """
-    [참여 응답 시리얼라이저]
-    - 참여 생성 결과(스냅샷 단가 포함)
-    """
+    """참여 응답: 스냅샷 단가 포함"""
     class Meta:
         model = SupplyJoin
         fields = ["id", "supply", "user", "joined_at", "unit_amount", "status"]

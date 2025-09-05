@@ -4,11 +4,11 @@ from django.utils import timezone
 
 def parse_user_datetime(s: str, default="start") -> datetime:
     """
-    자유 형식 날짜문자열 → timezone-aware datetime
+    자유 형식 → timezone-aware datetime
     - '2025, 7'  → 2025-07-01 00:00 (start) / 2025-07-31 23:59:59 (end)
     - '2025-07-15' → 00:00 / 23:59:59
-    - '2025/07/15 18:30' → 정확히 파싱
-    실패 시 now 반환(원하면 ValidationError로 바꿔도 됨)
+    - '2025/07/15 18:30' → 그대로
+    실패 시 now 반환(원하면 ValidationError로 교체 가능)
     """
     s = (s or "").strip()
 
