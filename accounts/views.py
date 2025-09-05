@@ -3,11 +3,8 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.settings import api_settings
-from utils.helpers import format_timestamp_iso
 from .serializers import LoginSerializer
-from .services import UserService
+from .services import UserService, JWTService
 
 class Root(APIView):
     def get_permissions(self):
@@ -17,25 +14,15 @@ class Root(APIView):
             return [IsAuthenticated()]
 
     def post(self, request:HttpRequest, format=None):
-        service = UserService(request)
-        user = service.post()
+        user_service = UserService(request)
+        user = user_service.post()
 
-        refresh_token = RefreshToken.for_user(user)
-        access_token = refresh_token.access_token
+        jwt_service = JWTService()
+        data = jwt_service.post(user)
 
         return Response(
             status=status.HTTP_200_OK,
-            data={
-                'grant_type': api_settings.AUTH_HEADER_TYPES[0],
-                'access': {
-                    'token': str(access_token),
-                    'expire_at': format_timestamp_iso(access_token['exp']),
-                },
-                'refresh': {
-                    'token': str(refresh_token),
-                    'expire_at': format_timestamp_iso(refresh_token['exp']),
-                },
-            },
+            data=data,
         )
 
 class Login(APIView):
@@ -44,20 +31,10 @@ class Login(APIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
 
-        refresh_token = RefreshToken.for_user(user)
-        access_token = refresh_token.access_token
+        jwt_service = JWTService()
+        data = jwt_service.post(user)
 
         return Response(
             status=status.HTTP_200_OK,
-            data={
-                'grant_type': api_settings.AUTH_HEADER_TYPES[0],
-                'access': {
-                    'token': str(access_token),
-                    'expire_at': format_timestamp_iso(access_token['exp']),
-                },
-                'refresh': {
-                    'token': str(refresh_token),
-                    'expire_at': format_timestamp_iso(refresh_token['exp']),
-                },
-            },
+            data=data,
         )
