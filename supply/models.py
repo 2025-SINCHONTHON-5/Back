@@ -65,11 +65,6 @@ class SupplyPost(models.Model):
 
 
 class SupplyJoin(models.Model):
-    """
-    참여 레코드
-    - 인당 금액은 신청 시점 스냅샷(원 단위 정수).
-    - 상태는 기본 PENDING (필요시 CONFIRMED/CANCELED 사용).
-    """
     STATUS_CHOICES = (
         ("PENDING", "Pending"),
         ("CONFIRMED", "Confirmed"),
@@ -80,14 +75,18 @@ class SupplyJoin(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="supply_joins")
     joined_at = models.DateTimeField(auto_now_add=True)
     unit_amount = models.DecimalField(max_digits=12, decimal_places=0)
+
+    # 👇 신규: 신청 시 사용자가 남기는 메모(요청사항)
+    content = models.TextField(blank=True, help_text="신청 시 남긴 요청사항/메모")
+
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="PENDING")
 
     class Meta:
-        unique_together = ("supply", "user")  # 중복참여 방지
+        unique_together = ("supply", "user")
 
     def __str__(self):
         return f"{self.user} -> {self.supply} ({self.unit_amount}원)"
-
+    
 class Comment(models.Model):
     created_at = models.DateTimeField(
         auto_now_add=True,
