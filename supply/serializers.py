@@ -117,10 +117,10 @@ class SupplyJoinSerializer(serializers.ModelSerializer):
         model = SupplyJoin
         fields = [
             "id", "supply", "user", "joined_at",
-            "unit_amount", "request_note",   # 👈 추가
+            "unit_amount", "content",   # 👈 추가
             "status",
         ]
-        read_only_fields = ["id", "joined_at", "unit_amount", "status", "user"]
+        read_only_fields = ["id", "supply", "user","joined_at", "unit_amount", "status" ]
 
 class SupplyJoinMySerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
