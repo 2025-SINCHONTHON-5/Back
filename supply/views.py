@@ -34,6 +34,7 @@ class SupplyPostViewSet(viewsets.ModelViewSet):
     def join(self, request, pk=None):
         """선착순 참여 생성"""
         try:
+            note = request.data.get("request_note", "")
             join = join_supply(request.user, pk)
         except ValueError as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -44,23 +45,6 @@ class SupplyPostViewSet(viewsets.ModelViewSet):
         """참여 전 인당 금액 미리보기 (계좌 연동은 이후 단계)"""
         supply = self.get_object()
         return Response({"unit_amount_preview": supply.unit_amount_preview})
-
-    @action(detail=True, methods=["get"], url_path="applicants")
-    def applicants(self, request, pk=None):
-        """지원자 목록(작성자만 조회 가능)"""
-        supply = self.get_object()
-        if request.user != supply.author:
-            return Response({"detail": "작성자만 조회할 수 있습니다."}, status=status.HTTP_403_FORBIDDEN)
-
-        qs = supply.joins.select_related("user").order_by("-joined_at")
-        data = [{
-            "user_id": j.user_id,
-            "username": getattr(j.user, "username", None),
-            "unit_amount": int(j.unit_amount),
-            "status": j.status,
-            "joined_at": j.joined_at,
-        } for j in qs]
-        return Response({"count": len(data), "results": data})
 
 class Comment(APIView):
     permission_classes = [IsAuthenticated]
@@ -79,16 +63,4 @@ class Comment(APIView):
             status=status.HTTP_201_CREATED,
             data={"detail": "댓글을 추가했어요."},
         )
-        
-class SupplyPostViewSet(viewsets.ModelViewSet):
-    ...
-    @action(detail=True, methods=["post"], url_path="join")
-    def join(self, request, pk=None):
-        """선착순 참여 생성"""
-        try:
-            note = request.data.get("request_note", "")
-            join = join_supply(request.user, pk, note)   # ✅ note 전달
-        except ValueError as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        return Response(SupplyJoinSerializer(join).data, status=status.HTTP_201_CREATED)
-
+    
