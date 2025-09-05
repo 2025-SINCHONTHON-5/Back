@@ -1,38 +1,59 @@
 from rest_framework import serializers
-from .models import DeliveryOffer, Request
+from .models import Task, Comment
 from accounts.serializers import UserSerializer 
 
-class DeliveryOfferSerializer(serializers.ModelSerializer):
-    supplier = UserSerializer(read_only=True)
+class CommentSerializer(serializers.ModelSerializer):
+    author = UserSerializer(read_only=True)
 
     class Meta:
-        model = DeliveryOffer
-        fields = [
-            'id',
-            'supplier',
-            'title',
-            'description',
-            'delivery_fee',
-            'max_participants',
-            'delivery_time',
-            'status',
-            'created_at'
-        ]
+        model = Comment
+        fields = ['id', 'author', 'content', 'created_at']
 
-class RequestSerializer(serializers.ModelSerializer):
+class TaskListSerializer(serializers.ModelSerializer):
+    
     requester = UserSerializer(read_only=True)
-    offer = DeliveryOfferSerializer(read_only=True)
+    comment_count = serializers.SerializerMethodField()
+
+    def get_comment_count(self, obj):
+        return obj.comments.count()
 
     class Meta:
-        model = Request
+        model = Task
         fields = [
             'id',
+            'title',
+            'content',
+            'photo',
             'requester',
-            'offer',
-            'products',
-            'quantity',
-            'special_requests',
-            'status',
-            'created_at'
+            'created_at',
+            'comment_count',
+            ]
+
+class TaskDetailSerializer(serializers.ModelSerializer):
+    requester = UserSerializer(read_only=True)
+    comments = CommentSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Task
+        fields = [
+            'id', 'requester', 'title', 'content', 'photo',
+            'status', 'created_at', 'updated_at', 'comments'
         ]
-        read_only_fields = ['requester', 'offer', 'status']
+        read_only_fields = ['requester', 'status', 'comments']
+
+class TaskSerializer(serializers.ModelSerializer):
+    requester = UserSerializer(read_only=True)
+    helper = UserSerializer(read_only=True)
+    comments = CommentSerializer(many=True, read_only=True)
+    comment_count = serializers.SerializerMethodField()
+
+    def get_comment_count(self, obj):
+        return obj.comments.count()
+    
+    class Meta:
+        model = Task
+        fields = [
+            'id', 'requester', 'helper', 'title', 'content', 'photo',
+            'status', 'created_at', 'updated_at', 'comments', 'comment_count'
+        ]
+        read_only_fields = ['requester', 'helper', 'status', 'comments']

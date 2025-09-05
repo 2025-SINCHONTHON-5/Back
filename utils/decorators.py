@@ -1,7 +1,6 @@
 from functools import wraps
 from django.db import IntegrityError
-from rest_framework import status
-from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
 
 def example(func):
     """
@@ -21,10 +20,7 @@ def validate_data(service_func):
     @wraps(service_func)
     def wrapper(self, *args, **kwargs):
         if not self.serializer.is_valid():
-            return Response(
-                self.serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            raise ValidationError(detail=self.serializer.errors)
         return service_func(self, *args, **kwargs)
     return wrapper
 
@@ -39,8 +35,5 @@ def validate_unique(service_func):
             return service_func(self, *args, **kwargs)
         except IntegrityError as error:
             if "UNIQUE constraint failed" in str(error):
-                return Response(
-                    {"detail":"이미 존재하는 값이에요."},
-                    status=status.HTTP_409_CONFLICT,
-                )
+                raise ValidationError(detail="이미 존재하는 값이에요.")
     return wrapper

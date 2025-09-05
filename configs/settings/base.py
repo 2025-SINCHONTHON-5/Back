@@ -28,6 +28,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt',
+    'django_filters',
+    'supply',
     'accounts.apps.AccountsConfig',
     'Request',
 ]
@@ -150,6 +152,9 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ),
+    'DEFAULT_FILTER_BACKENDS': [
+        'rest_framework.filters.OrderingFilter', 
+    ],
 }
 
 
