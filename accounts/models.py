@@ -26,6 +26,14 @@ class User(AbstractUser):
         alphabetically=ascii_lowercase+digits,
         size=21,
     )
+    name = models.CharField(
+        max_length=10,
+        help_text='이름(실명)',
+    )
+    bank_account = models.CharField(
+        max_length=16,
+        help_text='00000000000000',
+    )
 
     def __str__(self):
         return self.email
