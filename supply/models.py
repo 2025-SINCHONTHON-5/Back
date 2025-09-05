@@ -27,7 +27,7 @@ class SupplyPost(models.Model):
     # Request 앱의 모델을 FK로 '그냥' 참조 (앱/모델 경로는 실제 프로젝트에 맞춤)
     # - dev 브랜치에 'Request' 앱이 설치되어 있고 모델명이 Request 라고 가정
     request = models.ForeignKey(
-        "Request.Request",      # 앱라벨.모델명 (대소문자 프로젝트 구조에 맞춤)
+        "Request.Task",      # 앱라벨.모델명 (대소문자 프로젝트 구조에 맞춤)
         on_delete=models.SET_NULL,
         null=True, blank=True,
         related_name="supplies",
