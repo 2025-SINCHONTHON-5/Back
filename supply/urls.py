@@ -15,7 +15,6 @@ urlpatterns = [
     # supplies/ 경로 고정 (프로젝트 urls.py에서 path("api/", include("supply.urls"))로 붙는다고 가정)
     path("", supply_list, name="supply-list"),
     path("<int:pk>/", supply_detail, name="supply-detail"),
-    path("<int:pk>/join/", supply_join, name="supply-join"),
     path("<int:pk>/quote/", supply_quote, name="supply-quote"),
     path("<int:pk>/applicants/", supply_apps, name="supply-applicants"),
     path("comment/", Comment.as_view(), name="supply-comment"),

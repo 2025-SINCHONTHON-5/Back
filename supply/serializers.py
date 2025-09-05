@@ -112,16 +112,6 @@ class SupplyPostDetailSerializer(serializers.ModelSerializer):
             # 필요시 더 노출
         }
 
-class SupplyJoinSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SupplyJoin
-        fields = [
-            "id", "supply", "user", "joined_at",
-            "unit_amount", "request_note",   # 👈 추가
-            "status",
-        ]
-        read_only_fields = ["id", "joined_at", "unit_amount", "status", "user"]
-
 class SupplyJoinMySerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
     phone_number = serializers.SerializerMethodField()

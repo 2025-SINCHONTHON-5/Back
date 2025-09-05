@@ -45,23 +45,6 @@ class SupplyPostViewSet(viewsets.ModelViewSet):
         supply = self.get_object()
         return Response({"unit_amount_preview": supply.unit_amount_preview})
 
-    @action(detail=True, methods=["get"], url_path="applicants")
-    def applicants(self, request, pk=None):
-        """지원자 목록(작성자만 조회 가능)"""
-        supply = self.get_object()
-        if request.user != supply.author:
-            return Response({"detail": "작성자만 조회할 수 있습니다."}, status=status.HTTP_403_FORBIDDEN)
-
-        qs = supply.joins.select_related("user").order_by("-joined_at")
-        data = [{
-            "user_id": j.user_id,
-            "username": getattr(j.user, "username", None),
-            "unit_amount": int(j.unit_amount),
-            "status": j.status,
-            "joined_at": j.joined_at,
-        } for j in qs]
-        return Response({"count": len(data), "results": data})
-
 class Comment(APIView):
     permission_classes = [IsAuthenticated]
 
