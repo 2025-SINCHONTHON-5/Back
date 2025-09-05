@@ -11,6 +11,7 @@ class CommentSerializer(serializers.ModelSerializer):
         allow_null=False,
         min_value=1,
     )
+    user = serializers.StringRelatedField(read_only=True)
 
     class Meta:
         model = Comment
@@ -23,9 +24,13 @@ class CommentSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
+        post_id = validated_data['post_id']
+        # 2. post_id를 사용해 SupplyPost 객체를 찾습니다.
+        post_instance = SupplyPost.objects.get(id=post_id)
         comment = Comment.objects.create(
-            user=self.context.get('request'),
-            post=validated_data['post_id']
+            user=self.context.get('request').user,
+            post=post_instance,
+            content=validated_data['content']
         )
         return comment
 
@@ -43,7 +48,7 @@ class SupplyPostCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = SupplyPost
         fields = [
-            "id", "author",
+            "id",
             "request",                # FK: Request.Request
             "title", "content", "image",
             "total_amount", "max_participants",
