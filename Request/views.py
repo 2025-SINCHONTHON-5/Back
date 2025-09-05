@@ -5,12 +5,23 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .models import Task, Comment
 from .serializers import TaskSerializer, CommentSerializer, TaskDetailSerializer, TaskListSerializer
+from django.db.models import Count
 
 
 class TaskListCreateView(generics.ListCreateAPIView):
-    queryset = Task.objects.filter(status=Task.TaskStatus.PENDING).order_by('-created_at')
+    queryset = Task.objects.all()
     serializer_class = TaskSerializer
     permission_classes = [IsAuthenticated]
+
+    ordering_fields = ['created_at', 'comment_count']
+
+    def get_queryset(self):
+        queryset = Task.objects.annotate(
+            comment_count=Count('comments')
+        ).filter(
+            status=Task.TaskStatus.PENDING
+        )
+        return queryset
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
