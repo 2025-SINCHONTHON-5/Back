@@ -30,7 +30,6 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'django_filters',
     'supply',
-    'demand',
     'accounts.apps.AccountsConfig',
     'Request',
 ]
