@@ -15,15 +15,6 @@ from .serializers import (
 from .services import join_supply
 
 class SupplyPostViewSet(viewsets.ModelViewSet):
-    """
-    공급글 ViewSet (수동 매핑으로 URL 구성)
-      - list:   GET   /api/supplies/
-      - create: POST  /api/supplies/
-      - retrieve: GET /api/supplies/{id}/
-      - join:   POST  /api/supplies/{id}/join/
-      - quote:  GET   /api/supplies/{id}/quote/
-      - applicants: GET /api/supplies/{id}/applicants/
-    """
     queryset = SupplyPost.objects.all().select_related("author", "request")
     permission_classes = [IsAuthenticated]
 
