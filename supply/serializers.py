@@ -139,15 +139,14 @@ class SupplyJoinMySerializer(serializers.ModelSerializer):
 class SupplyPostMySerializer(serializers.ModelSerializer):
     days_left = serializers.SerializerMethodField()
     join_member_count = serializers.IntegerField()
-    goal_member_count = serializers.IntegerField()
-    join_members = SupplyJoinMySerializer(many=True)
+    joins = SupplyJoinMySerializer(many=True)
 
     class Meta:
         model = SupplyPost
-        fields = ('id','title','days_left','join_member_count','goal_member_count','join_members',)
-        read_only_fields = ('id','title','days_left','join_member_count','goal_member_count','join_members',)
+        fields = ('id','title','days_left','join_member_count','max_participants','joins',)
+        read_only_fields = ('id','title','days_left','join_member_count','max_participants','joins',)
 
     def get_days_left(self, obj):
-        end_date = obj.apply_deadline
+        end_date = obj.apply_deadline.date()
         today = timezone.localdate()
         return (end_date - today).days
