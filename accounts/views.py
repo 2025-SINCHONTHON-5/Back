@@ -7,7 +7,7 @@ from rest_framework_simplejwt.settings import api_settings
 from utils.helpers import format_timestamp_iso
 from .serializers import LoginSerializer
 
-class AccountsLoginRoot(APIView):
+class Login(APIView):
     def post(self, request:HttpRequest, format=None):
         serializer = LoginSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
