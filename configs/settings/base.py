@@ -3,7 +3,7 @@ import os
 from datetime import timedelta
 import environ
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
 # env
@@ -14,8 +14,6 @@ environ.Env.read_env(os.path.join(BASE_DIR, 'env', '.env.base'))
 SECRET_KEY = env('SECRET_KEY')
 
 DEBUG = env('DEBUG')
-
-ALLOWED_HOSTS = []
 
 
 # Application definition
