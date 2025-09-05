@@ -1,11 +1,12 @@
-# supply/views.py
+from django.http import HttpRequest
 from rest_framework import viewsets, status
+from rest_framework.views import APIView
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.forms.models import model_to_dict
 from .models import SupplyPost, SupplyJoin
-from .serializers import SupplyPostSerializer, SupplyJoinSerializer
+from .serializers import SupplyPostSerializer, SupplyJoinSerializer, CommentSerializer
 from .services import join_supply
 
 class SupplyPostViewSet(viewsets.ModelViewSet):
@@ -63,3 +64,21 @@ class SupplyPostViewSet(viewsets.ModelViewSet):
             for j in qs
         ]
         return Response({"count": len(data), "results": data})
+
+class Comment(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request:HttpRequest, format=None):
+        serializer = CommentSerializer(data=request.data, context={'request': request})
+
+        if not serializer.is_valid(raise_exception=True):
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data=serializer.errors,
+            )
+
+        serializer.save()
+        return Response(
+            status=status.HTTP_201_CREATED,
+            data={"detail": "댓글을 추가했어요."},
+        )
