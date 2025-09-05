@@ -5,7 +5,9 @@ django-environ==0.12.0
 django-nanoid==0.0.2
 djangorestframework==3.16.1
 djangorestframework_simplejwt==5.5.1
+gunicorn==23.0.0
 nanoid==2.0.0
+packaging==25.0
 pillow==11.3.0
 pip==25.2
 psycopg2==2.9.10
