@@ -13,12 +13,12 @@ class UserService:
         instance = get_instance_or_404(User, pk=pk, error_message='사용자를 찾을 수 없어요.') if pk else None
         self.request = request
         self.instance = instance
-        self.serialiser = UserSerializer(instance, data=request.data)
+        self.serializer = UserSerializer(instance, data=request.data)
 
     @validate_unique
     @validate_data
     def post(self):
-        created_user = self.serialiser.save()
+        created_user = self.serializer.save()
         return created_user
 
 class JWTService:
