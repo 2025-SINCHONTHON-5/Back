@@ -148,6 +148,6 @@ class SupplyPostMySerializer(serializers.ModelSerializer):
         read_only_fields = ('id','title','days_left','join_member_count','goal_member_count','join_members',)
 
     def get_days_left(self, obj):
-        end_date = obj.apply_deadline
+        end_date = obj.apply_deadline.date()
         today = timezone.localdate()
         return (end_date - today).days
