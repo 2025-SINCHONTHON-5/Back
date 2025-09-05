@@ -1,8 +1,10 @@
+from django.http import HttpRequest
 from rest_framework import generics, status
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .models import DeliveryOffer, Request
-from .serializers import DeliveryOfferSerializer, RequestSerializer
+from .serializers import DeliveryOfferSerializer, RequestSerializer, CommentSerializer
 
 
 class DeliveryOfferListView(generics.ListAPIView):
@@ -44,3 +46,21 @@ class MyRequestListView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         return Request.objects.filter(requester=user).order_by('-created_at')
+
+class Comment(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request:HttpRequest, format=None):
+        serializer = CommentSerializer(data=request.data, context={'request': request})
+
+        if not serializer.is_valid(raise_exception=True):
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data=serializer.errors,
+            )
+
+        serializer.save()
+        return Response(
+            status=status.HTTP_201_CREATED,
+            data={"detail": "댓글을 추가했어요."},
+        )

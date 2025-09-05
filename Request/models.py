@@ -34,3 +34,22 @@ class Request(models.Model):
 
     def __str__(self):
         return f"{self.requester.email} -> {self.offer.title} ({self.products})"
+
+class Comment(models.Model):
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='request_comment',
+    )
+    post = models.ForeignKey(
+        'Request',
+        on_delete=models.CASCADE,
+        related_name='comment',
+    )
+    content = models.TextField()
+
+    def __str__(self):
+        return self.content

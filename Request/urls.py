@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import DeliveryOfferListView, RequestCreateView, MyRequestListView
+from .views import *
 
 urlpatterns = [
     # GET /offers/ -> 전체 제안 목록 보기
@@ -10,4 +10,6 @@ urlpatterns = [
 
     # GET /requests/mine/ -> 내가 보낸 요청 목록 보기 
     path('mine/', MyRequestListView.as_view(), name='my-request-list'),
+
+    path('comment', Comment.as_view())
 ]
