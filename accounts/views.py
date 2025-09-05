@@ -59,7 +59,11 @@ class MyReceiveRequest(APIView):
     def get(self, request:HttpRequest, format=None):
         order = request.query_params.get('order')
 
-        supplies = SupplyPost.objects.filter(author=request.user)
+        supplies = SupplyPost.objects.filter(
+            author=request.user
+        ).annotate(
+            join_member_count=Count('joins', distinct=True)
+        )
 
         if order == 'newest':
             supplies = supplies.order_by('-created_at')
