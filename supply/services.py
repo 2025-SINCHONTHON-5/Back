@@ -15,7 +15,12 @@ def join_supply(user, supply_id, request_note: str = "") -> SupplyJoin:
     """
     supply = SupplyPost.objects.select_for_update().get(id=supply_id)
     now = timezone.now()
-
+    print("--- 시간 비교 디버깅 ---")
+    print("DB에 저장된 마감 시간 (apply_deadline):", supply.apply_deadline)
+    print("DB에 저장된 마감 시간 (apply_deadline):", supply.apply_deadline)
+    print("현재 서버 시간 (now):", now)
+    print("비교 결과 (apply_deadline <= now):", supply.apply_deadline <= now)
+    print("-----------------------")
     if supply.status != SupplyPost.Status.OPEN:
         raise ValueError("모집이 종료되었습니다.")
     if supply.apply_deadline <= now:
@@ -36,7 +41,7 @@ def join_supply(user, supply_id, request_note: str = "") -> SupplyJoin:
     join, created = SupplyJoin.objects.get_or_create(
         supply=supply,
         user=user,
-        defaults={"unit_amount": unit, "request_note": request_note},
+        defaults={"unit_amount": unit, "content": request_note},
     )
 
     # 기존 신청이 있었는데 메모를 새로 보냈다면 갱신(선택사항)
