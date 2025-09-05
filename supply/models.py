@@ -102,3 +102,22 @@ class SupplyJoin(models.Model):
 
     def __str__(self):
         return f"{self.user} -> {self.supply} ({self.unit_amount}원)"
+
+class Comment(models.Model):
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='supply_comment',
+    )
+    post = models.ForeignKey(
+        'SupplyPost',
+        on_delete=models.CASCADE,
+        related_name='comment',
+    )
+    content = models.TextField()
+
+    def __str__(self):
+        return self.content

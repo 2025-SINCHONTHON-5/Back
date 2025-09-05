@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import SupplyPostViewSet
+from .views import *
 
 # ViewSet을 함수형 뷰로 바인딩
 supply_list    = SupplyPostViewSet.as_view({"get": "list", "post": "create"})
@@ -15,4 +15,5 @@ urlpatterns = [
     path("supplies/<int:pk>/join/", supply_join, name="supply-join"),
     path("supplies/<int:pk>/quote/", supply_quote, name="supply-quote"),
     path("supplies/<int:pk>/applicants/", supply_apps, name="supply-applicants"),
+    path('comment', Comment.as_view()),
 ]

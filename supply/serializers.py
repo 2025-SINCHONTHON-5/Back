@@ -1,7 +1,32 @@
 from rest_framework import serializers
 from decimal import Decimal, ROUND_UP
-from .models import SupplyPost, SupplyJoin
+from .models import SupplyPost, SupplyJoin, Comment
 from .utils import parse_user_datetime
+
+class CommentSerializer(serializers.ModelSerializer):
+    post_id = serializers.IntegerField(
+        write_only=True,
+        required=True,
+        allow_null=False,
+        min_value=1,
+    )
+
+    class Meta:
+        model = Comment
+        fields = '__all__'
+        read_only_fields = ('id','created_at','user','post',)
+
+    def validate_post_id(self, value):
+        if not SupplyPost.objects.filter(id=value).exists():
+            raise serializers.ValidationError('글이 존재하지 않아요.')
+        return value
+
+    def create(self, validated_data):
+        comment = Comment.objects.create(
+            user=self.context.get('request'),
+            post=validated_data['post_id']
+        )
+        return comment
 
 class SupplyPostCreateSerializer(serializers.ModelSerializer):
     """
