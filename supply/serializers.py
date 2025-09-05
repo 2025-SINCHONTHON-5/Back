@@ -1,3 +1,4 @@
+from django.utils import timezone
 from rest_framework import serializers
 from decimal import Decimal, ROUND_UP
 from .models import SupplyPost, SupplyJoin, Comment
@@ -111,7 +112,6 @@ class SupplyPostDetailSerializer(serializers.ModelSerializer):
             # 필요시 더 노출
         }
 
-
 class SupplyJoinSerializer(serializers.ModelSerializer):
     class Meta:
         model = SupplyJoin
@@ -121,3 +121,33 @@ class SupplyJoinSerializer(serializers.ModelSerializer):
             "status",
         ]
         read_only_fields = ["id", "joined_at", "unit_amount", "status", "user"]
+
+class SupplyJoinMySerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+    phone_number = serializers.SerializerMethodField()
+
+    class Meta:
+        model = SupplyJoin
+        fields = ('id','name','phone_number','content',)
+
+    def get_name(self, obj):
+        return obj.user.name
+
+    def get_phone_number(self, obj):
+        return obj.user.phone_number
+
+class SupplyPostMySerializer(serializers.ModelSerializer):
+    days_left = serializers.SerializerMethodField()
+    join_member_count = serializers.IntegerField()
+    goal_member_count = serializers.IntegerField()
+    join_members = SupplyJoinMySerializer(many=True)
+
+    class Meta:
+        model = SupplyPost
+        fields = ('id','title','days_left','join_member_count','goal_member_count','join_members',)
+        read_only_fields = ('id','title','days_left','join_member_count','goal_member_count','join_members',)
+
+    def get_days_left(self, obj):
+        end_date = obj.apply_deadline
+        today = timezone.localdate()
+        return (end_date - today).days
