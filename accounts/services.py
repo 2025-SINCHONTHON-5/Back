@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.http import HttpRequest
+from utils.decorators import validate_data, validate_unique
 from utils.helpers import get_instance_or_404
 from .serializers import UserSerializer
 
@@ -11,3 +12,9 @@ class UserService:
         self.request = request
         self.instance = instance
         self.serialiser = UserSerializer(instance, data=request.data)
+
+    @validate_unique
+    @validate_data
+    def post(self):
+        created_user = self.serialiser.save()
+        return created_user
