@@ -79,3 +79,16 @@ class Comment(APIView):
             status=status.HTTP_201_CREATED,
             data={"detail": "댓글을 추가했어요."},
         )
+        
+class SupplyPostViewSet(viewsets.ModelViewSet):
+    ...
+    @action(detail=True, methods=["post"], url_path="join")
+    def join(self, request, pk=None):
+        """선착순 참여 생성"""
+        try:
+            note = request.data.get("request_note", "")
+            join = join_supply(request.user, pk, note)   # ✅ note 전달
+        except ValueError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(SupplyJoinSerializer(join).data, status=status.HTTP_201_CREATED)
+

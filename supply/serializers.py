@@ -113,11 +113,14 @@ class SupplyPostDetailSerializer(serializers.ModelSerializer):
         }
 
 class SupplyJoinSerializer(serializers.ModelSerializer):
-    """참여 응답: 스냅샷 단가 포함"""
     class Meta:
         model = SupplyJoin
-        fields = ["id", "supply", "user", "joined_at", "unit_amount", "status"]
-        read_only_fields = ["joined_at", "unit_amount", "status"]
+        fields = [
+            "id", "supply", "user", "joined_at",
+            "unit_amount", "request_note",   # 👈 추가
+            "status",
+        ]
+        read_only_fields = ["id", "joined_at", "unit_amount", "status", "user"]
 
 class SupplyJoinMySerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
